@@ -1,0 +1,9 @@
+firebase-admin==6.1.0
+google-cloud-firestore==2.11.1
+google-cloud-storage==2.9.0
+numpy==1.23.5
+opencv-contrib-python==3.4.18.65
+opencv-python==4.5.5.64
+openpyxl==3.0.10
+Pillow==9.5.0
+python-firebase==1.2
