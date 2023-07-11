@@ -15,12 +15,12 @@ service_account_path = os.path.join(script_dir, "service_account.json")
 # Inisialisasi Firestore
 db = firestore.client()
 
-def train_classifier(nim):
+def train_classifier(nim, img_index):
     # Mendapatkan data gambar wajah dari Firebase Cloud Storage
     client = storage.Client.from_service_account_json(service_account_path)
     bucket_name = "metpen-face-recognition.appspot.com"
     bucket = client.get_bucket(bucket_name)
-    folder_path = f"mahasiswa/{nim}/"
+    folder_path = f"mahasiswa/{nim}_{img_index}/"
     blob_prefix = f"{folder_path}{nim}."
     blobs = bucket.list_blobs(prefix=blob_prefix)
 
