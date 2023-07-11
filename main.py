@@ -1,6 +1,7 @@
 import os
 import io
 import cv2
+from datetime import datetime
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials
@@ -21,10 +22,6 @@ db = firestore.client()
 
 # Inisialisasi Google Cloud Storage client
 client = storage.Client.from_service_account_json(service_account_path)
-
-# classifier_path = f"model/classifier.xml"
-# recognizer = cv2.face.LBPHFaceRecognizer_create()
-# recognizer.read(classifier_path)
 
 cascadePath = os.path.join(script_dir, "haarcascade_frontalface_default.xml")
 faceCascade = cv2.CascadeClassifier(cascadePath)
@@ -64,6 +61,12 @@ recognizer.read(temp_classifier_path)
 cam = cv2.VideoCapture(0)
 
 while True:
+    # Mendapatkan waktu saat ini
+    now = datetime.now()
+
+    # Format waktu ke dalam string
+    formatted_time = now.strftime("%H:%M:%S - %d/%m/%Y")
+
     ret, img =cam.read()
     #img = cv2.flip(img, -1) # Flip vertically
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -73,6 +76,7 @@ while True:
         scaleFactor = 1.9,
         minNeighbors = 5
     )
+
     for(x,y,w,h) in faces:
         cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
         id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
@@ -81,19 +85,28 @@ while True:
         if (confidence < 100):
             id = daftar_nim[id-1]
             confidence = "  {0}%".format(round(100 - confidence))
-
         else:
             id = "unknown"
             confidence = "  {0}%".format(round(100 - confidence))
-        
-        cv2.putText(img, str(id), (x+5,y-5), font, 1, (255,255,255), 2)
+
+        # Mendapatkan nama dari dokument 'mahasiswa' dengan ID yang diperoleh
+        id_split = id.split('_')[0]
+        nama = ""
+        doc_ref = db.collection('mahasiswa').document(id_split)
+        doc = doc_ref.get()
+        if doc.exists:
+            nama = doc.to_dict().get('nama')
+
+        cv2.putText(img, nama, (x+5,y-5), font, 1, (255,255,255), 2)
 
         if id!="Unknown":
-            print("NIM: ", id)
+            print("NIM: ", id_split)
+            print("Nama: ", nama)
+            print("Waktu: ", formatted_time)
             print("Confidence: ", confidence)
-    
+
     cv2.imshow('camera',img) 
-    k = cv2.waitKey(1) # Press 'ESC' for exiting video
+    k = cv2.waitKey(1)
     if k == 113:
         break
 
