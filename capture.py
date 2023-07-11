@@ -30,7 +30,11 @@ cascade_path = os.path.join(script_dir, "haarcascade_frontalface_default.xml")
 faceClassifier = cv2.CascadeClassifier(cascade_path)
 
 # Input dan Pengecekan Data Gambar Wajah Mahasiswa
-img_id = 0
+img_id=0
+img_index=0
+
+if img_index==0:
+    img_index+=1
 
 while True:
     nim = input("NIM: ")
@@ -75,7 +79,7 @@ while True:
         face=cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
         # Path untuk Menyimpan Dataset ke Cloud Storage
-        storage_path = f"{nim}/{nim}.{img_id}.jpg"
+        storage_path = f"mahasiswa/{nim}/{nim}.{img_index}.{img_id}.jpg"
 
         # Menyimpan Dataset
         blob = bucket.blob(storage_path)
