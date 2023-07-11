@@ -20,7 +20,7 @@ def train_classifier(nim):
     client = storage.Client.from_service_account_json(service_account_path)
     bucket_name = "metpen-face-recognition.appspot.com"
     bucket = client.get_bucket(bucket_name)
-    folder_path = f"{nim}/"
+    folder_path = f"mahasiswa/{nim}/"
     blob_prefix = f"{folder_path}{nim}."
     blobs = bucket.list_blobs(prefix=blob_prefix)
 
@@ -34,7 +34,7 @@ def train_classifier(nim):
         # Konversi ke array numpy
         image_np = np.array(img, 'uint8')
         
-        id = int(blob.name.split(".")[-2])
+        id = int(blob.name.split(".")[1])
         
         faces.append(image_np)
         ids.append(id)
@@ -49,11 +49,11 @@ def train_classifier(nim):
     clf.train(faces, ids)
 
     # Menyimpan classifier
-    classifier_path = "{nim}.classifier.xml"
+    classifier_path = "model_classifier.xml"
     clf.write(classifier_path)
 
     # Mengunggah classifier ke Firebase Cloud Storage
-    blob_path = f"{nim}/model/{nim}.classifier.xml"
+    blob_path = f"model/classifier.xml"
     blob = bucket.blob(blob_path)
     blob.upload_from_filename(classifier_path)
 
