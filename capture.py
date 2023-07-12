@@ -1,5 +1,6 @@
-import cv2
 import os
+import cv2
+import ctypes
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -37,6 +38,16 @@ img_index=0
 
 if img_index==0:
     img_index+=1
+
+blobs = bucket.list_blobs(prefix=folder_prefix)
+file_names = [blob.name.split("/")[1] for blob in blobs]
+sorted_file_names = sorted(file_names, reverse=True)
+
+if sorted_file_names:
+    last_file_name = sorted_file_names[0]
+    img_index = int(last_file_name.split(".")[1]) + 1
+else:
+    img_index = 1
 
 blobs = bucket.list_blobs(prefix=folder_prefix)
 for blob in blobs:
@@ -128,9 +139,12 @@ while True:
     if key==113 or img_id==100:
         break
 
-from train import train_classifier
-train_classifier(mahasiswa)
-
 # Menutup Kamera dan Jendela OpenCV
 camera.release()
 cv2.destroyAllWindows()
+
+# Menampilkan kotak dialog setelah jendela OpenCV ditutup
+result = ctypes.windll.user32.MessageBoxW(0, "Apakah Anda ingin melakukan train dataset?", "Train Dataset", 1)
+if result == 1:
+    from train import train_classifier
+    train_classifier(mahasiswa)
