@@ -93,6 +93,9 @@ while True:
         doc = doc_ref.get()
         if doc.exists:
             name = doc.to_dict().get('name')
+            gender = doc.to_dict().get('gender')
+            major = doc.to_dict().get('major')
+            starting_year = doc.to_dict().get('starting_year')
 
         cv2.putText(img, name, (x+5,y-5), font, 1, (255,255,255), 2)
 
@@ -110,6 +113,9 @@ while True:
             )
             print("NIM: ", id)
             print("Nama: ", name)
+            print("Jenis Kelamin: ", gender)
+            print("Jurusan: ", major)
+            print("Tahun Masuk: ", starting_year)
             print("Waktu: ", formatted_time)
             print("Confidence: ", confidence)
         else:
