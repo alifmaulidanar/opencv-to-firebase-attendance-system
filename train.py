@@ -15,14 +15,13 @@ service_account_path = os.path.join(script_dir, "service_account.json")
 # Inisialisasi Firestore
 db = firestore.client()
 
-def train_classifier(nim, img_index):
+def train_classifier(mahasiswa):
     # Mendapatkan data gambar wajah dari Firebase Cloud Storage
     client = storage.Client.from_service_account_json(service_account_path)
     bucket_name = "metpen-face-recognition.appspot.com"
     bucket = client.get_bucket(bucket_name)
-    folder_path = f"mahasiswa/{nim}_{img_index}/"
-    blob_prefix = f"{folder_path}{nim}."
-    blobs = bucket.list_blobs(prefix=blob_prefix)
+    folder_path = f"mahasiswa/"
+    blobs = mahasiswa
 
     faces = []
     ids = []
@@ -61,7 +60,7 @@ def train_classifier(nim, img_index):
     os.remove(classifier_path)
 
     # Simpan data training status di Firestore
-    mahasiswa_ref = db.collection("mahasiswa").document(nim)
-    mahasiswa_ref.update({"face_registered": True})
+    # mahasiswa_ref = db.collection("mahasiswa").document(nim)
+    # mahasiswa_ref.update({"face_registered": True})
 
     ctypes.windll.user32.MessageBoxW(0, "Training Dataset Completed!!", "Result", 1)

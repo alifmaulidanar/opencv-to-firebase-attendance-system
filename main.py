@@ -61,10 +61,7 @@ recognizer.read(temp_classifier_path)
 cam = cv2.VideoCapture(0)
 
 while True:
-    # Mendapatkan waktu saat ini
     now = datetime.now()
-
-    # Format waktu ke dalam string
     formatted_time = now.strftime("%H:%M:%S - %d/%m/%Y")
 
     ret, img =cam.read()
@@ -86,24 +83,37 @@ while True:
             id = daftar_nim[id-1]
             confidence = "  {0}%".format(round(100 - confidence))
         else:
-            id = "unknown"
+            id = "Unknown"
             confidence = "  {0}%".format(round(100 - confidence))
 
         # Mendapatkan nama dari dokument 'mahasiswa' dengan ID yang diperoleh
-        id_split = id.split('_')[0]
-        nama = ""
-        doc_ref = db.collection('mahasiswa').document(id_split)
+        # id_split = id.split('_')[0]
+        name = ""
+        doc_ref = db.collection('mahasiswa').document(id)
         doc = doc_ref.get()
         if doc.exists:
-            nama = doc.to_dict().get('nama')
+            name = doc.to_dict().get('name')
 
-        cv2.putText(img, nama, (x+5,y-5), font, 1, (255,255,255), 2)
+        cv2.putText(img, name, (x+5,y-5), font, 1, (255,255,255), 2)
 
         if id!="Unknown":
-            print("NIM: ", id_split)
-            print("Nama: ", nama)
+            doc_ref = db.collection('mahasiswa').document(id)
+            attendance = {
+                'history_attendance': firestore.ArrayUnion([formatted_time]),
+                'last_attendance': formatted_time,
+                'total_attendance': len(doc_ref.get().to_dict().get('attendance', {}).get('history_attendance', []))
+            }
+            
+            doc_ref.set(
+                {'attendance': attendance},
+                merge=True
+            )
+            print("NIM: ", id)
+            print("Nama: ", name)
             print("Waktu: ", formatted_time)
             print("Confidence: ", confidence)
+        else:
+            print('Mahasiswa tidak terdaftar.')
 
     cv2.imshow('camera',img) 
     k = cv2.waitKey(1)

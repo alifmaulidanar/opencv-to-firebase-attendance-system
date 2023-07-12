@@ -30,8 +30,8 @@ cascade_path = os.path.join(script_dir, "haarcascade_frontalface_default.xml")
 faceClassifier = cv2.CascadeClassifier(cascade_path)
 
 # Input dan Pengecekan Data Gambar Wajah Mahasiswa
-nim = 0
-folder_prefix = f"mahasiswa/{nim}."
+folder_prefix = f"mahasiswa/"
+mahasiswa = bucket.list_blobs(prefix=folder_prefix)
 img_id=0
 img_index=0
 
@@ -40,16 +40,14 @@ if img_index==0:
 
 blobs = bucket.list_blobs(prefix=folder_prefix)
 for blob in blobs:
-    folder_name = blob.name.split("/")[1]
-    if folder_name.startswith(f"{nim}."):
-        img_index = int(folder_name.split("_")[1])
+    file_name = blob.name.split(".")[1]
+    if file_name == str(img_index):
         img_index += 1
         break
 
 while True:
+    print(img_index)
     nim = input("NIM: ")
-    nama = input("Nama: ")
-
     # Cek NIM di Firebase Cloud Storage
     blobs = bucket.list_blobs(prefix=nim + "/")
     nim_exists_in_storage = any(True for _ in blobs)
@@ -61,12 +59,23 @@ while True:
         print("NIM mahasiswa sudah terdaftar.")
         continue
 
+    name = input("Nama: ")
     # Cek nama di Firestore
-    query = db.collection("mahasiswa").where("nama", "==", nama)
+    query = db.collection("mahasiswa").where("nama", "==", name)
     nama_exists_in_firestore = len(query.get()) > 0
     if nama_exists_in_firestore:
         print("Nama mahasiswa sudah terdaftar.")
         continue
+
+    gender = ""
+    while gender != "L" and gender != "P":
+        gender = input("Jenis Kelamin (L/P): ")
+        gender = gender.upper()
+        if gender != "L" and gender != "P":
+            print("Input tidak valid. Silakan masukkan 'L' atau 'P'.")
+
+    major = input("Jurusan: ")
+    starting_year = input("Tahun Masuk: ")
     break
 
 # Jendela OpenCV
@@ -89,7 +98,7 @@ while True:
         face=cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
         # Path untuk Menyimpan Dataset ke Cloud Storage
-        storage_path = f"mahasiswa/{nim}_{img_index}/{nim}.{img_index}.{img_id}.jpg"
+        storage_path = f"mahasiswa/{nim}.{img_index}.{img_id}.jpg"
 
         # Menyimpan Dataset
         blob = bucket.blob(storage_path)
@@ -101,7 +110,10 @@ while True:
             mahasiswa_ref.set(
                 {
                     "nim": nim,
-                    "nama": nama
+                    "name": name,
+                    "gender": gender,
+                    "major": major,
+                    "starting_year": starting_year
                 },
                 merge=True,
             )
@@ -117,7 +129,7 @@ while True:
         break
 
 from train import train_classifier
-train_classifier(nim, img_index)
+train_classifier(mahasiswa)
 
 # Menutup Kamera dan Jendela OpenCV
 camera.release()
