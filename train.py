@@ -1,9 +1,9 @@
 import os
 import io
-from PIL import Image
-import numpy as np
 import cv2
 import ctypes
+import numpy as np
+from PIL import Image
 from firebase_admin import firestore
 from google.cloud import storage
 
