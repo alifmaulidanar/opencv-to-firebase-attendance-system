@@ -36,25 +36,18 @@ mahasiswa = bucket.list_blobs(prefix=folder_prefix)
 img_id=0
 img_index=0
 
-if img_index==0:
-    img_index+=1
+if img_index == 0:
+    img_index += 1
 
 blobs = bucket.list_blobs(prefix=folder_prefix)
-file_names = [blob.name.split("/")[1] for blob in blobs]
-sorted_file_names = sorted(file_names, reverse=True)
+folder_names = [blob.name.split("/")[1] for blob in blobs]
+sorted_folder_names = sorted(folder_names, reverse=True)
 
-if sorted_file_names:
-    last_file_name = sorted_file_names[0]
-    img_index = int(last_file_name.split(".")[1]) + 1
+if sorted_folder_names:
+    last_folder_name = sorted_folder_names[0]
+    img_index = int(last_folder_name.split("_")[1]) + 1
 else:
     img_index = 1
-
-blobs = bucket.list_blobs(prefix=folder_prefix)
-for blob in blobs:
-    file_name = blob.name.split(".")[1]
-    if file_name == str(img_index):
-        img_index += 1
-        break
 
 while True:
     print(img_index)
@@ -109,7 +102,7 @@ while True:
         face=cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
         # Path untuk Menyimpan Dataset ke Cloud Storage
-        storage_path = f"mahasiswa/{nim}.{img_index}.{img_id}.jpg"
+        storage_path = f"mahasiswa/{nim}_{img_index}/{nim}.{img_index}.{img_id}.jpg"
 
         # Menyimpan Dataset
         blob = bucket.blob(storage_path)
