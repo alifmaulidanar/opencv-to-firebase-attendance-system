@@ -20,26 +20,40 @@ def train_classifier(mahasiswa):
     client = storage.Client.from_service_account_json(service_account_path)
     bucket_name = "metpen-face-recognition.appspot.com"
     bucket = client.get_bucket(bucket_name)
-    folder_path = f"mahasiswa/"
     blobs = mahasiswa
 
     faces = []
     ids = []
 
     for blob in blobs:
-        blob_data = blob.download_as_bytes()
-        img = Image.open(io.BytesIO(blob_data)).convert("L")
-        
-        # Konversi ke array numpy
-        image_np = np.array(img, 'uint8')
-        
-        id = int(blob.name.split(".")[1])
-        
-        faces.append(image_np)
-        ids.append(id)
-        
-        cv2.imshow("Training...", image_np)
-        cv2.waitKey(1)
+        blob_name = blob.name
+        if blob_name.endswith(".jpg"):
+            # Memisahkan nama folder dan nama file
+            folder_name, file_name = blob_name.split("/")[-2:]
+
+            # Memisahkan nim dan img_index dari nama folder
+            nim, img_index = folder_name.split("_")
+
+            # Hanya memproses file yang sesuai dengan format yang diinginkan
+            if file_name.startswith(f"{nim}.{img_index}."):
+                # Mendownload data gambar sebagai byte array
+                blob_data = blob.download_as_bytes()
+
+                # Mengonversi byte array menjadi gambar
+                img = cv2.imdecode(np.frombuffer(blob_data, np.uint8), cv2.IMREAD_GRAYSCALE)
+
+                # Menambahkan gambar ke daftar faces
+                faces.append(img)
+
+                # Mendapatkan img_id dari nama file
+                id = int(file_name.split(".")[1])
+                print(id)
+
+                # Menambahkan id ke daftar ids
+                ids.append(id)
+
+                cv2.imshow("Training...", img)
+                cv2.waitKey(1)
     
     ids = np.array(ids)
 
