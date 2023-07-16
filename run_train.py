@@ -17,7 +17,7 @@ db = firestore.client()
 
 # Inisialisasi Cloud Storage
 client = storage.Client.from_service_account_json(service_account_path)
-bucket_name = "metpen-face-recognition.appspot.com"
+bucket_name = ""
 bucket = client.get_bucket(bucket_name)
 folder_prefix = f"mahasiswa/"
 mahasiswa = bucket.list_blobs(prefix=folder_prefix)
