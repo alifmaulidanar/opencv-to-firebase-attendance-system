@@ -29,7 +29,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 id = 0
 
 # Cari mahasiswa berdasarkan NIM
-bucket_name = "metpen-face-recognition.appspot.com"
+bucket_name = ""
 bucket = client.get_bucket(bucket_name)
 folder_prefix = "mahasiswa/"
 
